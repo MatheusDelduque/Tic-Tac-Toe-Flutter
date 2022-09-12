@@ -9,10 +9,10 @@ class Display extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: const Color.fromARGB(137, 5, 141, 107),
+          backgroundColor: const Color.fromARGB(255, 0, 110, 255),
           title: const Text("Tic Tac Toe"),
         ),
-        backgroundColor: const Color.fromARGB(255, 106, 119, 106),
+        backgroundColor: const Color.fromARGB(255, 22, 2, 97),
         body: const CardButtons(),
       ),
     );

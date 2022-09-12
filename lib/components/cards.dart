@@ -1,3 +1,4 @@
+import 'package:bin2dec/game.dart';
 import 'package:flutter/material.dart';
 
 class CardButtons extends StatefulWidget {
@@ -8,67 +9,47 @@ class CardButtons extends StatefulWidget {
 }
 
 class _CardButtonsState extends State<CardButtons> {
-  String playerX = "X";
-  String playerO = "O";
-  List<String> choosinPosition = ["", "", "", "", "", "", "", "", ""];
-  List<List<int>> winningCombinations = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  bool isCircle = false;
+  late Game game;
 
-  void changingPlayer(index) {
-    setState(() {
-      if (choosinPosition[index] == "" && isCircle == false) {
-        choosinPosition[index] = "X";
-      }
-
-      if (choosinPosition[index] == "" && isCircle == true) {
-        choosinPosition[index] = "O";
-      }
-      isCircle = !isCircle;
-      if (checkWinner() == true) {
-        finalText("X");
-      }
-    });
+  @override
+  void initState() {
+    super.initState();
+    game = Game(onGameOver);
   }
 
-  void restartGame() {
-    setState(() {
-      choosinPosition = ["", "", "", "", "", "", "", "", ""];
-    });
+  void onGameOver(GameOverState state) {
+    switch (state) {
+      case GameOverState.xWin:
+        showFinalText("X is winner");
+        break;
+
+      case GameOverState.oWin:
+        showFinalText("O is winner");
+        break;
+
+      default:
+        showFinalText("Draw");
+    }
   }
 
-  void finalText(String winner) {
+  void showFinalText(String text) {
     showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("$winner is Winner!!!"),
-            actions: [
-              TextButton(
-                child: const Text("Play Again"),
-                onPressed: () {
-                  restartGame();
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        });
-  }
-
-  checkWinner() {
-    winningCombinations.map(
-      (combinations) => combinations
-          .every((elemento) => choosinPosition[elemento].contains("X")),
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(text),
+          actions: [
+            TextButton(
+              child: const Text("Play Again"),
+              onPressed: () {
+                game.restartGame();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -85,14 +66,19 @@ class _CardButtonsState extends State<CardButtons> {
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
                 onTap: () => {
-                  changingPlayer(index),
+                  game.play(index),
                 },
                 child: Card(
                   color: Colors.white,
                   child: Center(
-                    child: Text(
-                      choosinPosition[index],
-                      style: const TextStyle(fontSize: 80),
+                    child: ValueListenableBuilder<List<String>>(
+                      valueListenable: game.board,
+                      builder: (context, value, child) {
+                        return Text(
+                          value[index],
+                          style: const TextStyle(fontSize: 80),
+                        );
+                      },
                     ),
                   ),
                 ),
